@@ -5,12 +5,33 @@ import (
 	"strings"
 )
 
+const (
+	short = iota
+	long
+)
+
 func Duration(delta int64) string {
-	const year_text = 'y'
-	const day_text = 'd'
-	const hour_text = 'h'
-	const minute_text = 'm'
-	const second_text = 's'
+	return duration(delta, short)
+}
+
+func LongDuration(delta int64) string {
+	return duration(delta, long)
+}
+
+func duration(delta, style int64) string {
+	year_text := "y"
+	day_text := "d"
+	hour_text := "h"
+	minute_text := "m"
+	second_text := "s"
+
+	if style == long {
+		year_text = " year"
+		day_text = " day"
+		hour_text = " hour"
+		minute_text = " minute"
+		second_text = " second"
+	}
 
 	const SECONDS_PER_MINUTE = 60
 	const SECONDS_PER_HOUR = 60 * SECONDS_PER_MINUTE
@@ -18,7 +39,12 @@ func Duration(delta int64) string {
 	const SECONDS_PER_YEAR = 365 * SECONDS_PER_DAY
 
 	if delta == 0 {
-		return "0s"
+		switch style {
+		case short:
+			return "0s"
+		case long:
+			return "0 seconds"
+		}
 	}
 
 	years := delta / SECONDS_PER_YEAR
@@ -39,27 +65,42 @@ func Duration(delta int64) string {
 	idx := 0
 
 	if years > 0 {
-		timeChunk[idx] = fmt.Sprintf("%d%c", years, year_text)
+		timeChunk[idx] = fmt.Sprintf("%d%v", years, year_text)
+		if style == long && years > 1 {
+			timeChunk[idx] += "s"
+		}
 		idx++
 	}
 	if idx > 0 || days > 0 {
-		timeChunk[idx] = fmt.Sprintf("%d%c", days, day_text)
+		timeChunk[idx] = fmt.Sprintf("%d%v", days, day_text)
+		if style == long && days > 1 {
+			timeChunk[idx] += "s"
+		}
 		idx++
 	}
 	if idx > 0 || hours > 0 {
-		timeChunk[idx] = fmt.Sprintf("%d%c", hours, hour_text)
+		timeChunk[idx] = fmt.Sprintf("%d%v", hours, hour_text)
+		if style == long && hours > 1 {
+			timeChunk[idx] += "s"
+		}
 		idx++
 	}
 	if idx > 0 || minutes > 0 {
-		timeChunk[idx] = fmt.Sprintf("%2d%c", minutes, minute_text)
+		timeChunk[idx] = fmt.Sprintf("%2d%v", minutes, minute_text)
+		if style == long && minutes > 1 {
+			timeChunk[idx] += "s"
+		}
 		idx++
 	}
 	if idx > 0 || seconds > 0 {
-		fmtStr := "%2d%c"
+		fmtStr := "%2d%v"
 		if idx == 0 {
-			fmtStr = "%d%c"
+			fmtStr = "%d%v"
 		}
 		timeChunk[idx] = fmt.Sprintf(fmtStr, seconds, second_text)
+		if style == long && seconds > 1 {
+			timeChunk[idx] += "s"
+		}
 		idx++
 	}
 
