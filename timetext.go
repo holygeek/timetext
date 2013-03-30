@@ -10,15 +10,23 @@ const (
 	long
 )
 
+func TerseDuration(delta int64) string {
+	return duration(delta, short, true)
+}
+
+func TerseLongDuration(delta int64) string {
+	return duration(delta, long, true)
+}
+
 func Duration(delta int64) string {
-	return duration(delta, short)
+	return duration(delta, short, false)
 }
 
 func LongDuration(delta int64) string {
-	return duration(delta, long)
+	return duration(delta, long, false)
 }
 
-func duration(delta, style int64) string {
+func duration(delta, style int64, terse bool) string {
 	year_text := "y"
 	day_text := "d"
 	hour_text := "h"
@@ -71,28 +79,28 @@ func duration(delta, style int64) string {
 		}
 		idx++
 	}
-	if idx > 0 || days > 0 {
+	if (!terse && idx > 0) || days > 0 {
 		timeChunk[idx] = fmt.Sprintf("%d%v", days, day_text)
 		if style == long && days > 1 {
 			timeChunk[idx] += "s"
 		}
 		idx++
 	}
-	if idx > 0 || hours > 0 {
+	if (!terse && idx > 0) || hours > 0 {
 		timeChunk[idx] = fmt.Sprintf("%d%v", hours, hour_text)
 		if style == long && hours > 1 {
 			timeChunk[idx] += "s"
 		}
 		idx++
 	}
-	if idx > 0 || minutes > 0 {
+	if (!terse && idx > 0) || minutes > 0 {
 		timeChunk[idx] = fmt.Sprintf("%2d%v", minutes, minute_text)
 		if style == long && minutes > 1 {
 			timeChunk[idx] += "s"
 		}
 		idx++
 	}
-	if idx > 0 || seconds > 0 {
+	if (!terse && idx > 0) || seconds > 0 {
 		fmtStr := "%2d%v"
 		if idx == 0 {
 			fmtStr = "%d%v"
