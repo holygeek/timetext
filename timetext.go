@@ -28,6 +28,7 @@ func LongDuration(delta int64) string {
 
 func duration(delta, style int64, terse bool) string {
 	year_text := "y"
+	week_text := "w"
 	day_text := "d"
 	hour_text := "h"
 	minute_text := "m"
@@ -35,6 +36,7 @@ func duration(delta, style int64, terse bool) string {
 
 	if style == long {
 		year_text = " year"
+		week_text = " week"
 		day_text = " day"
 		hour_text = " hour"
 		minute_text = " minute"
@@ -44,6 +46,7 @@ func duration(delta, style int64, terse bool) string {
 	const SECONDS_PER_MINUTE = 60
 	const SECONDS_PER_HOUR = 60 * SECONDS_PER_MINUTE
 	const SECONDS_PER_DAY = 24 * SECONDS_PER_HOUR
+	const SECONDS_PER_WEEK = 7 * SECONDS_PER_DAY
 	const SECONDS_PER_YEAR = 365 * SECONDS_PER_DAY
 
 	if delta == 0 {
@@ -58,6 +61,9 @@ func duration(delta, style int64, terse bool) string {
 	years := delta / SECONDS_PER_YEAR
 	delta = delta % SECONDS_PER_YEAR
 
+	weeks := delta / SECONDS_PER_WEEK
+	delta = delta % SECONDS_PER_WEEK
+
 	days := delta / SECONDS_PER_DAY
 	delta = delta % SECONDS_PER_DAY
 
@@ -69,12 +75,20 @@ func duration(delta, style int64, terse bool) string {
 
 	seconds := delta
 
-	var timeChunk [5]string
+	const nChunks = 6 // years weeks days hours minutes seconds
+	var timeChunk [nChunks]string
 	idx := 0
 
 	if years > 0 {
 		timeChunk[idx] = fmt.Sprintf("%d%v", years, year_text)
 		if style == long && years > 1 {
+			timeChunk[idx] += "s"
+		}
+		idx++
+	}
+	if (!terse && idx > 0) || weeks > 0 {
+		timeChunk[idx] = fmt.Sprintf("%d%v", weeks, week_text)
+		if style == long && weeks > 1 {
 			timeChunk[idx] += "s"
 		}
 		idx++
